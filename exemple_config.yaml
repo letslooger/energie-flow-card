@@ -1,0 +1,28 @@
+# Energie Flow Card : exemple de configuration
+# Remplace chaque sensor.xxx par le nom de ton propre capteur.
+# Les lignes facultatives peuvent être supprimées : la carte s'adapte.
+type: custom:energie-flow-card
+title: Mon énergie
+car_name: Ma voiture            # facultatif
+pv1_power: sensor.pv1_puissance # production solaire (W ou kW)
+pv2_power: sensor.pv2_puissance # facultatif : 2e chaîne de panneaux
+# pv_power: sensor.production_totale   # à la place de pv1/pv2 si tu as un capteur total
+extra_pv:                       # facultatif : autres installations
+  - name: PV Garage
+    entity: sensor.pv_garage_puissance
+battery_power: sensor.batterie_puissance   # + = décharge
+invert_battery: false           # true si ton capteur est inversé
+battery_soc: sensor.batterie_soc
+battery_voltage: sensor.batterie_tension   # facultatif
+battery_temperature: sensor.batterie_temperature   # facultatif
+grid_power: sensor.reseau_puissance        # + = achat
+invert_grid: false              # true si ton capteur est inversé
+load_power: sensor.maison_consommation
+car_power: sensor.voiture_puissance_charge # facultatif
+car_soc: sensor.voiture_batterie           # facultatif
+pv_today: sensor.production_du_jour
+load_today: sensor.consommation_du_jour
+battery_charge_today: sensor.batterie_charge_du_jour
+battery_discharge_today: sensor.batterie_decharge_du_jour
+grid_import_today: sensor.achat_du_jour
+grid_export_today: sensor.vente_du_jour
