@@ -1,25 +1,36 @@
 # Energie Flow Card : exemple de configuration
-# Remplace chaque sensor.xxx par le nom de ton propre capteur.
-# Les lignes facultatives peuvent être supprimées : la carte s'adapte.
+# Remplace chaque sensor.xxx par ton capteur.
+# Une ligne « facultatif » ne te sert pas ?
+# Supprime-la : la carte s'adapte.
 type: custom:energie-flow-card
 title: Mon énergie
-car_name: Ma voiture            # facultatif
-pv1_power: sensor.pv1_puissance # production solaire (W ou kW)
-pv2_power: sensor.pv2_puissance # facultatif : 2e chaîne de panneaux
-# pv_power: sensor.production_totale   # à la place de pv1/pv2 si tu as un capteur total
-extra_pv:                       # facultatif : autres installations
+# facultatif : nom de ta voiture
+car_name: Ma voiture
+# production solaire (W ou kW)
+pv1_power: sensor.pv1_puissance
+# facultatif : 2e chaîne de panneaux
+pv2_power: sensor.pv2_puissance
+# facultatif : autres installations
+extra_pv:
   - name: PV Garage
     entity: sensor.pv_garage_puissance
-battery_power: sensor.batterie_puissance   # + = décharge
-invert_battery: false           # true si ton capteur est inversé
+# batterie (+ = décharge)
+battery_power: sensor.batterie_puissance
+# true si les flux batterie sont inversés
+invert_battery: false
 battery_soc: sensor.batterie_soc
-battery_voltage: sensor.batterie_tension   # facultatif
-battery_temperature: sensor.batterie_temperature   # facultatif
-grid_power: sensor.reseau_puissance        # + = achat
-invert_grid: false              # true si ton capteur est inversé
+# facultatif : tension et température
+battery_voltage: sensor.batterie_tension
+battery_temperature: sensor.batterie_temperature
+# réseau (+ = achat)
+grid_power: sensor.reseau_puissance
+# true si achat et vente sont inversés
+invert_grid: false
 load_power: sensor.maison_consommation
-car_power: sensor.voiture_puissance_charge # facultatif
-car_soc: sensor.voiture_batterie           # facultatif
+# facultatif : voiture électrique
+car_power: sensor.voiture_puissance_charge
+car_soc: sensor.voiture_batterie
+# bilan du jour (kWh)
 pv_today: sensor.production_du_jour
 load_today: sensor.consommation_du_jour
 battery_charge_today: sensor.batterie_charge_du_jour

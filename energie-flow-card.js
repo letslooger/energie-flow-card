@@ -11,7 +11,7 @@ class EnergieFlowCard extends HTMLElement {
         title: "Mon énergie",
         invert_battery: false, // false : puissance batterie positive = décharge
         invert_grid: false, // false : puissance réseau positive = achat
-        car_name: "Marvel R",
+        car_name: "Ma voiture",
       },
       config
     );
@@ -219,7 +219,7 @@ class EnergieFlowCard extends HTMLElement {
     <text class="tag" x="130" y="466">maison</text>
 
     <!-- VOITURE -->
-    <g transform="translate(272,402)">
+    <g id="g-car" transform="translate(272,402)">
       <path d="M-40,8 L-36,-6 Q-30,-20 -14,-22 L12,-22 Q26,-22 34,-8 L42,-4 Q46,-2 46,6 L46,12 L-40,12 Z"
             fill="rgba(76,201,240,.15)" stroke="#4cc9f0" stroke-width="3" stroke-linejoin="round" filter="url(#glow)"/>
       <path d="M-26,-8 Q-22,-17 -12,-17 L-2,-17 L-2,-8 Z M4,-17 L12,-17 Q22,-17 27,-8 L4,-8 Z" fill="#4cc9f0" opacity=".5"/>
@@ -240,9 +240,15 @@ class EnergieFlowCard extends HTMLElement {
     <div class="chip"><div class="k">🔋 Batterie</div><div class="v" id="d-bat">—</div></div>
     <div class="chip"><div class="k">⚡ Achat</div><div class="v" id="d-imp">—</div></div>
     <div class="chip"><div class="k">💸 Vente</div><div class="v" id="d-exp">—</div></div>
-    <div class="chip"><div class="k">🚗 ${c.car_name}</div><div class="v" id="d-car">—</div></div>
+    <div class="chip" id="chip-car"><div class="k">🚗 ${c.car_name}</div><div class="v" id="d-car">—</div></div>
   </div>
 </ha-card>`;
+    // pas de voiture configurée : on masque la voiture, son câble et sa case du bilan
+    if (!(c.car_power || c.car_soc || c.car_today))
+      ["g-car", "t-car", "t-carname", "p-car", "f-car", "chip-car"].forEach((id) => {
+        const e = this._$(id);
+        if (e) e.style.display = "none";
+      });
     this._built = true;
   }
 
