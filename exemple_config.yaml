@@ -19,6 +19,11 @@ battery_power: sensor.batterie_puissance
 # true si les flux batterie sont inversés
 invert_battery: false
 battery_soc: sensor.batterie_soc
+# facultatif : 2 batteries en parallèle ? leur niveau à chacune
+battery1_soc: sensor.batterie_1_soc
+battery1_name: Batt. 1
+battery2_soc: sensor.batterie_2_soc
+battery2_name: Batt. 2
 # facultatif : tension et température
 battery_voltage: sensor.batterie_tension
 battery_temperature: sensor.batterie_temperature
@@ -37,3 +42,38 @@ battery_charge_today: sensor.batterie_charge_du_jour
 battery_discharge_today: sensor.batterie_decharge_du_jour
 grid_import_today: sensor.achat_du_jour
 grid_export_today: sensor.vente_du_jour
+# facultatif : jusqu'à 8 appareils autour de la maison
+# entity = capteur de PUISSANCE de l'appareil (prise connectée, Shelly…)
+# icon = un emoji (♨️ 🍞 🫧) ou une icône mdi:xxx
+# energy_today = facultatif, énergie du jour en kWh
+# threshold = facultatif, en dessous de ces W l'appareil est à l'arrêt (5 par défaut)
+appliances:
+  - name: Pompe à chaleur
+    icon: ♨️
+    entity: sensor.pac_puissance
+    energy_today: sensor.pac_energie_du_jour
+    threshold: 30
+  - name: Four
+    icon: 🍞
+    entity: sensor.four_puissance
+  - name: Lave-linge
+    icon: 🫧
+    entity: sensor.lave_linge_puissance
+    threshold: 10
+  - name: Sèche-linge
+    icon: 🌀
+    entity: sensor.seche_linge_puissance
+    threshold: 10
+  - name: Lave-vaisselle
+    icon: 🍽️
+    entity: sensor.lave_vaisselle_puissance
+    threshold: 10
+  - name: Chauffe-eau
+    icon: 🚿
+    entity: sensor.chauffe_eau_puissance
+  - name: Frigo
+    icon: 🧊
+    entity: sensor.frigo_puissance
+  - name: Box / TV
+    icon: 📺
+    entity: sensor.tv_puissance

@@ -112,6 +112,15 @@ class EnergieFlowCard extends HTMLElement {
   .bar { height:8px; border-radius:6px; background:rgba(255,255,255,.08); margin-top:12px; overflow:hidden; }
   .bar i { display:block; height:100%; width:0; border-radius:6px; transition: width 1s;
            background: linear-gradient(90deg,#ef476f,#ffd166,#06d6a0); }
+  .apl-head { display:flex; justify-content:space-between; align-items:baseline; margin:14px 2px 0; }
+  .apl-head b { font-size:14px; font-weight:700; }
+  .apl-head span { font-size:11px; opacity:.7; }
+  .apl-node { cursor:pointer; transition: opacity .5s, filter .5s; }
+  .apl-node.off { opacity:.38; filter: grayscale(1); }
+  .apl-node .ring { transition: stroke-opacity .5s; }
+  .apl-node.on .ring { animation: aplPulse 2.2s ease-in-out infinite; }
+  @keyframes aplPulse { 0%,100% { stroke-opacity:.35 } 50% { stroke-opacity:1 } }
+  .apl-emoji { font-size:20px; text-anchor:middle; dominant-baseline:central; }
   .barlbl { display:flex; justify-content:space-between; font-size:10.5px; opacity:.7; margin-top:4px; }
 </style>
 <ha-card class="card">
@@ -190,6 +199,13 @@ class EnergieFlowCard extends HTMLElement {
     <text class="lbl" x="70" y="322" id="t-bat">—</text>
     <text class="sub" x="70" y="337" id="t-batinfo"></text>
     <text class="tag" x="70" y="188" id="t-batstate">batterie</text>
+    ${[1, 2].map((n, i) => `
+    <g id="mb${n}" style="display:none">
+      <text class="tag" x="6" y="${352 + i * 14}" style="text-anchor:start;font-size:9px;letter-spacing:.5px">${n === 1 ? (c.battery1_name || "B1") : (c.battery2_name || "B2")}</text>
+      <rect x="48" y="${345 + i * 14}" width="42" height="7" rx="3.5" fill="rgba(255,255,255,.1)"/>
+      <rect id="mb${n}-f" x="48" y="${345 + i * 14}" width="0" height="7" rx="3.5" fill="#06d6a0"/>
+      <text class="sub" id="mb${n}-t" x="94" y="${352 + i * 14}" style="text-anchor:start;font-size:10px;font-weight:700;fill:#fff">—</text>
+    </g>`).join("")}
 
     <!-- ONDULEUR -->
     <rect x="162" y="212" width="76" height="76" rx="20" fill="url(#gInv)" stroke="#6c7fd8" stroke-width="2"/>
@@ -219,7 +235,8 @@ class EnergieFlowCard extends HTMLElement {
     <text class="tag" x="130" y="466">maison</text>
 
     <!-- VOITURE -->
-    <g id="g-car" transform="translate(272,402)">
+    <g id="car-g">
+    <g transform="translate(272,402)">
       <path d="M-40,8 L-36,-6 Q-30,-20 -14,-22 L12,-22 Q26,-22 34,-8 L42,-4 Q46,-2 46,6 L46,12 L-40,12 Z"
             fill="rgba(76,201,240,.15)" stroke="#4cc9f0" stroke-width="3" stroke-linejoin="round" filter="url(#glow)"/>
       <path d="M-26,-8 Q-22,-17 -12,-17 L-2,-17 L-2,-8 Z M4,-17 L12,-17 Q22,-17 27,-8 L4,-8 Z" fill="#4cc9f0" opacity=".5"/>
@@ -229,7 +246,9 @@ class EnergieFlowCard extends HTMLElement {
     </g>
     <text class="lbl" x="272" y="452" id="t-car">—</text>
     <text class="tag" x="272" y="466" id="t-carname">${c.car_name}</text>
+    </g>
   </svg>
+${this._aplHtml()}
 
   <div class="bar"><i id="barfill"></i></div>
   <div class="barlbl"><span>Autoconsommation du jour</span><span id="t-autoday">—</span></div>
@@ -240,16 +259,83 @@ class EnergieFlowCard extends HTMLElement {
     <div class="chip"><div class="k">🔋 Batterie</div><div class="v" id="d-bat">—</div></div>
     <div class="chip"><div class="k">⚡ Achat</div><div class="v" id="d-imp">—</div></div>
     <div class="chip"><div class="k">💸 Vente</div><div class="v" id="d-exp">—</div></div>
-    <div class="chip" id="chip-car"><div class="k">🚗 ${c.car_name}</div><div class="v" id="d-car">—</div></div>
+    <div class="chip"><div class="k">🚗 ${c.car_name}</div><div class="v" id="d-car">—</div></div>
   </div>
 </ha-card>`;
-    // pas de voiture configurée : on masque la voiture, son câble et sa case du bilan
-    if (!(c.car_power || c.car_soc || c.car_today))
-      ["g-car", "t-car", "t-carname", "p-car", "f-car", "chip-car"].forEach((id) => {
-        const e = this._$(id);
-        if (e) e.style.display = "none";
-      });
     this._built = true;
+  }
+
+  /* ---------- bloc appareils (optionnel, jusqu'à 8) ---------- */
+  _aplHtml() {
+    const list = (this._config.appliances || []).slice(0, 8);
+    if (!list.length) return "";
+    const PAL = ["#ff8fab", "#ffd166", "#06d6a0", "#4cc9f0", "#c77dff", "#f78c6b", "#7ab8ff", "#b5e48c"];
+    const cx = 200, cy = 162, n = list.length;
+    const nTop = Math.ceil(n / 2), nBot = n - nTop;
+    const nodes = list.map((a, i) => {
+      const top = i < nTop, k = top ? i : i - nTop, cnt = top ? nTop : nBot;
+      const x = (400 / cnt) * (k + 0.5), y = top ? 74 : 250;
+      const col = a.color || PAL[i % PAL.length];
+      const ic = a.icon || "🔌";
+      const icon = ic.startsWith("mdi:")
+        ? `<foreignObject x="-13" y="-13" width="26" height="26"><ha-icon icon="${ic}" style="--mdc-icon-size:22px;color:${col};display:flex;justify-content:center"></ha-icon></foreignObject>`
+        : `<text class="apl-emoji">${ic}</text>`;
+      const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy);
+      const x1 = cx + (dx / d) * 34, y1 = cy + (dy / d) * 34, x2 = x - (dx / d) * 25, y2 = y - (dy / d) * 25;
+      return { i, x, y, top, col, icon, name: a.name || "Appareil " + (i + 1), path: `M${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)}` };
+    });
+    return `
+  <div class="apl-head"><b>🔌 Appareils</b><span id="apl-sum"></span></div>
+  <svg viewBox="0 0 400 322" xmlns="http://www.w3.org/2000/svg" style="margin-top:0">
+    ${nodes.map((o) => `<path id="p-apl-${o.i}" class="wire" d="${o.path}"/>`).join("")}
+    ${nodes.map((o) => `<g id="f-apl-${o.i}"></g>`).join("")}
+    <g transform="translate(${cx},${cy})">
+      <circle r="34" fill="rgba(199,125,255,.12)" stroke="#c77dff" stroke-width="2.5" filter="url(#glow)"/>
+      <path d="M-13,-2 L0,-13 L13,-2 M-9,-4 L-9,10 L9,10 L9,-4" stroke="#c77dff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,-8)"/>
+      <text class="lbl" y="18" id="apl-home" style="font-size:12.5px">—</text>
+    </g>
+    ${nodes.map((o) => `
+    <g class="apl-node off" id="apl-n-${o.i}" data-i="${o.i}" transform="translate(${o.x.toFixed(1)},${o.y.toFixed(1)})">
+      <circle r="24" fill="rgba(255,255,255,.05)"/>
+      <circle class="ring" r="24" fill="none" stroke="${o.col}" stroke-width="2.5" stroke-opacity=".35"/>
+      ${o.icon}
+      <text class="tag" y="${o.top ? -60 : 37}" style="font-size:8.5px">${o.name}</text>
+      <text class="lbl" y="${o.top ? -45 : 52}" id="apl-v-${o.i}" style="font-size:13px">—</text>
+      <text class="sub" y="${o.top ? -32 : 65}" id="apl-d-${o.i}" style="font-size:9px"></text>
+    </g>`).join("")}
+  </svg>`;
+  }
+
+  _aplUpdate(load) {
+    const list = (this._config.appliances || []).slice(0, 8);
+    if (!list.length) return;
+    const PAL = ["#ff8fab", "#ffd166", "#06d6a0", "#4cc9f0", "#c77dff", "#f78c6b", "#7ab8ff", "#b5e48c"];
+    let sum = 0, on = 0;
+    list.forEach((a, i) => {
+      const w = this._w(a.entity);
+      const node = this._$("apl-n-" + i);
+      if (!node) return;
+      const active = w !== null && w >= (a.threshold || 5);
+      if (w !== null) sum += Math.max(0, w);
+      if (active) on++;
+      node.classList.toggle("on", active);
+      node.classList.toggle("off", !active);
+      this._txt("apl-v-" + i, w === null ? "—" : this._fw(w));
+      const d = this._kwh(a.energy_today);
+      this._txt("apl-d-" + i, d === null ? "" : d.toFixed(1).replace(".", ",") + " kWh auj.");
+      this._flow("apl-" + i, active ? w : null, a.color || PAL[i % PAL.length]);
+      if (!node._click) {
+        node._click = true;
+        node.addEventListener("click", () => {
+          const ev = new Event("hass-more-info", { bubbles: true, composed: true });
+          ev.detail = { entityId: a.entity };
+          this.dispatchEvent(ev);
+        });
+      }
+    });
+    this._txt("apl-home", this._fw(load));
+    const rest = load !== null ? Math.max(0, load - sum) : null;
+    this._txt("apl-sum", `${on} en marche · ${this._fw(sum)}` + (rest !== null ? ` · autres ${this._fw(rest)}` : ""));
   }
 
   _$(id) {
@@ -329,7 +415,23 @@ class EnergieFlowCard extends HTMLElement {
     this._txt("t-grid", this._fw(grid));
     this._txt("t-gridstate", grid === null || Math.abs(grid) < 15 ? "réseau" : grid > 0 ? "achat" : "vente");
     this._txt("t-home", this._fw(load));
-    this._txt("t-car", car !== null && car >= 15 ? this._fw(car) : carSoc !== null ? Math.round(carSoc) + "%" : "—");
+    const carCharging = car !== null && car >= 15;
+    this._txt("t-car", carSoc !== null ? "🔋 " + Math.round(carSoc) + " %" : carCharging ? this._fw(car) : "—");
+    this._txt("t-carname", c.car_name + (carCharging ? " · " + this._fw(car) : ""));
+
+    // batteries individuelles
+    [[1, c.battery1_soc], [2, c.battery2_soc]].forEach(([n, id]) => {
+      const g = this._$("mb" + n);
+      if (!g) return;
+      const v = this._raw(id);
+      if (!id) { g.style.display = "none"; return; }
+      g.style.display = "";
+      const f = this._$("mb" + n + "-f");
+      const pct = v === null ? 0 : Math.max(0, Math.min(100, v));
+      f.setAttribute("width", (42 * pct) / 100);
+      f.setAttribute("fill", pct < 20 ? "#ef476f" : pct < 40 ? "#ffb703" : "#06d6a0");
+      this._txt("mb" + n + "-t", v === null ? "—" : Math.round(v) + " %");
+    });
 
     // champs PV supplémentaires (+ alerte si données anciennes)
     (c.extra_pv || []).forEach((p, i) => {
@@ -400,6 +502,15 @@ class EnergieFlowCard extends HTMLElement {
     if (dLoad && dImp !== null) autoDay = Math.max(0, Math.min(100, ((dLoad - dImp) / dLoad) * 100));
     this._$("barfill").style.width = (autoDay || 0) + "%";
     this._txt("t-autoday", autoDay === null ? "—" : Math.round(autoDay) + " %");
+
+    // voiture masquée si non configurée
+    this._$("car-g").style.display = c.car_power || c.car_soc ? "" : "none";
+    this._$("p-car").style.display = c.car_power || c.car_soc ? "" : "none";
+    if (!(c.car_power || c.car_soc)) this._flow("car", null, "");
+    this._$("d-car").parentElement.style.display = c.car_power || c.car_soc || c.car_today ? "" : "none";
+
+    // appareils
+    this._aplUpdate(load);
 
     // humeur du moment
     let mood;

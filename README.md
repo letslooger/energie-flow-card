@@ -12,7 +12,9 @@ An animated Home Assistant card: sun, battery, grid, house and car, with energy 
 - **Sun by day, moon and stars by night**, following Home Assistant's `sun.sun`; the sun spins faster as your panels produce more.
 - **Animated battery** whose level ripples like liquid, turning orange then red when it runs low, with voltage and temperature.
 - **Grid buying or selling** shown at a glance.
-- **Electric car**: a lightning bolt appears while it charges, with its battery level.
+- **Electric car**: its battery level always shown, plus a lightning bolt and charging power while it charges.
+- **Two batteries?** Each one's level is shown under the main battery.
+- **Up to 8 appliances** (heat pump, oven, washing machine…) around the house, with live power; idle ones turn grey.
 - **Extra solar arrays** (garage, outbuilding…), with an alert if one stops reporting.
 - **Mood line** that tells you what is going on ("The sun is doing all the work…").
 - **Real-time self-sufficiency**, today's self-consumption bar and daily totals.
@@ -25,6 +27,8 @@ An animated Home Assistant card: sun, battery, grid, house and car, with energy 
 
 <p align="center"><em>Daytime · Car charging · Night</em></p>
 
+<p align="center"><img src="images/appareils.png" width="380" alt="The Appliances block: 8 appliances around the house"></p>
+
 ## Installation
 
 1. Copy `energie-flow-card.js` into Home Assistant's `/config/www/` folder.
@@ -33,6 +37,10 @@ An animated Home Assistant card: sun, battery, grid, house and car, with energy 
    - Type: JavaScript module
 3. On your dashboard: Edit > Add card > Manual, then paste the content of `exemple_config.yaml`.
 4. Replace each `sensor.xxx` with your own sensors and save.
+
+## Updating
+
+Already using the card? Replace the content of `/config/www/energie-flow-card.js` with the new version, then in Settings > Dashboards > Resources bump the URL number (`?v=1` becomes `?v=2`, etc.) and reload. Your existing config keeps working as is: new features only show up if you add them.
 
 ## Troubleshooting
 
