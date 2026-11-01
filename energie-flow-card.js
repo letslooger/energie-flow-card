@@ -120,6 +120,10 @@ class EnergieFlowCard extends HTMLElement {
   .apl-node .ring { transition: stroke-opacity .5s; }
   .apl-node.on .ring { animation: aplPulse 2.2s ease-in-out infinite; }
   @keyframes aplPulse { 0%,100% { stroke-opacity:.35 } 50% { stroke-opacity:1 } }
+  .apl-wrap { position:relative; container-type:inline-size; }
+  .apl-ico { position:absolute; transform:translate(-50%,-50%); pointer-events:none; line-height:0; transition: opacity .5s, filter .5s; }
+  .apl-ico.off { opacity:.38; filter: grayscale(1); }
+  .apl-ico ha-icon { display:block; --mdc-icon-size:22px; --mdc-icon-size:5.5cqw; }
   .apl-emoji { font-size:20px; text-anchor:middle; dominant-baseline:central; }
   .barlbl { display:flex; justify-content:space-between; font-size:10.5px; opacity:.7; margin-top:4px; }
 </style>
@@ -277,15 +281,17 @@ ${this._aplHtml()}
       const x = (400 / cnt) * (k + 0.5), y = top ? 74 : 250;
       const col = a.color || PAL[i % PAL.length];
       const ic = a.icon || "🔌";
-      const icon = ic.startsWith("mdi:")
-        ? `<foreignObject x="-13" y="-13" width="26" height="26"><ha-icon icon="${ic}" style="--mdc-icon-size:22px;color:${col};display:flex;justify-content:center"></ha-icon></foreignObject>`
-        : `<text class="apl-emoji">${ic}</text>`;
+      /* Icônes mdi: posées en HTML par-dessus le SVG (pas de foreignObject :
+         Safari/iPhone les affiche en haut à gauche dans un groupe déplacé) */
+      const mdi = ic.startsWith("mdi:") ? ic : null;
+      const icon = mdi ? "" : `<text class="apl-emoji">${ic}</text>`;
       const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy);
       const x1 = cx + (dx / d) * 34, y1 = cy + (dy / d) * 34, x2 = x - (dx / d) * 25, y2 = y - (dy / d) * 25;
-      return { i, x, y, top, col, icon, name: a.name || "Appareil " + (i + 1), path: `M${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)}` };
+      return { i, x, y, top, col, icon, mdi, name: a.name || "Appareil " + (i + 1), path: `M${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)}` };
     });
     return `
   <div class="apl-head"><b>🔌 Appareils</b><span id="apl-sum"></span></div>
+  <div class="apl-wrap">
   <svg viewBox="0 0 400 322" xmlns="http://www.w3.org/2000/svg" style="margin-top:0">
     ${nodes.map((o) => `<path id="p-apl-${o.i}" class="wire" d="${o.path}"/>`).join("")}
     ${nodes.map((o) => `<g id="f-apl-${o.i}"></g>`).join("")}
@@ -303,7 +309,9 @@ ${this._aplHtml()}
       <text class="lbl" y="${o.top ? -45 : 52}" id="apl-v-${o.i}" style="font-size:13px">—</text>
       <text class="sub" y="${o.top ? -32 : 65}" id="apl-d-${o.i}" style="font-size:9px"></text>
     </g>`).join("")}
-  </svg>`;
+  </svg>
+  ${nodes.filter((o) => o.mdi).map((o) => `<div class="apl-ico off" id="apl-i-${o.i}" style="left:${(o.x / 4).toFixed(2)}%;top:${(o.y / 3.22).toFixed(2)}%"><ha-icon icon="${o.mdi}" style="color:${o.col}"></ha-icon></div>`).join("")}
+  </div>`;
   }
 
   _aplUpdate(load) {
@@ -320,6 +328,8 @@ ${this._aplHtml()}
       if (active) on++;
       node.classList.toggle("on", active);
       node.classList.toggle("off", !active);
+      const ico = this._$("apl-i-" + i);
+      if (ico) ico.classList.toggle("off", !active);
       this._txt("apl-v-" + i, w === null ? "—" : this._fw(w));
       const d = this._kwh(a.energy_today);
       this._txt("apl-d-" + i, d === null ? "" : d.toFixed(1).replace(".", ",") + " kWh auj.");
