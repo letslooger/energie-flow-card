@@ -42,6 +42,19 @@ An animated Home Assistant card: sun, battery, grid, house and car, with energy 
 
 Already using the card? Replace the content of `/config/www/energie-flow-card.js` with the new version, then in Settings > Dashboards > Resources bump the URL number (`?v=1` becomes `?v=2`, etc.) and reload. Your existing config keeps working as is: new features only show up if you add them.
 
+## On iPad or a large screen
+
+On a wide screen, Home Assistant lays cards out in several columns, so the card only takes one column. To make it full width, put it on its own in a **Panel** view:
+
+1. Open your dashboard and click the **pencil** at the top right (Edit dashboard).
+2. Click the **+** next to the tabs to create a view, and name it e.g. "Energy".
+3. Under **View type**, choose **Panel (single card)**, then Save.
+4. Add the card to this view (Add card > Manual, then paste your config).
+
+As soon as the card is wider than 700 pixels, it rearranges itself: the diagram on the left, appliances and today's figures on the right. Nothing changes on a phone.
+
+<p align="center"><img src="images/ecran-large.png" width="760" alt="The card at full width on an iPad"></p>
+
 ## Troubleshooting
 
 **Dots flow the wrong way (battery or grid).** Depending on the brand, a sensor may count charging as positive or negative. If the card shows "charge" while your battery is discharging, change `invert_battery: false` to `invert_battery: true` in the config. Same for the grid with `invert_grid` if buying and selling are swapped.

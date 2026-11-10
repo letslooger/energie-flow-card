@@ -42,6 +42,19 @@ Une carte Home Assistant animée : soleil, batterie, réseau, maison et voiture,
 
 Tu as déjà la carte ? Remplace le contenu de `/config/www/energie-flow-card.js` par la nouvelle version, puis dans Paramètres > Tableaux de bord > Ressources, augmente le numéro de l'URL (`?v=1` devient `?v=2`, etc.) et recharge la page. Ta configuration actuelle continue de marcher telle quelle : les nouveautés ne s'affichent que si tu les ajoutes.
 
+## Sur iPad ou grand écran
+
+Sur un écran large, Home Assistant range les cartes en plusieurs colonnes : la carte ne prend alors qu'une colonne. Pour qu'elle prenne toute la largeur, mets-la seule dans une vue de type **Panneau** :
+
+1. Ouvre ton tableau de bord, puis clique sur le **crayon** en haut à droite (Modifier le tableau de bord).
+2. Clique sur le **+** à côté des onglets pour créer une vue, nomme-la par exemple « Énergie ».
+3. Dans **Type de vue**, choisis **Panneau (1 carte)**, puis Enregistrer.
+4. Ajoute la carte dans cette vue (Ajouter une carte > Manuel, puis colle ta configuration).
+
+Dès que la carte fait plus de 700 pixels de large, elle se réorganise toute seule : le schéma à gauche, les appareils et les chiffres du jour à droite. Sur téléphone, rien ne change.
+
+<p align="center"><img src="images/ecran-large.png" width="760" alt="La carte en pleine largeur sur iPad"></p>
+
 ## En cas de souci
 
 **Les points vont dans le mauvais sens (batterie ou réseau).** Selon les marques, un capteur peut compter la charge en positif ou en négatif. Si la carte affiche « charge » alors que ta batterie se décharge, remplace `invert_battery: false` par `invert_battery: true` dans la configuration. Même chose pour le réseau avec `invert_grid` si « achat » et « vente » sont inversés.

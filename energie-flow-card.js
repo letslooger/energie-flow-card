@@ -126,6 +126,17 @@ class EnergieFlowCard extends HTMLElement {
   .apl-ico ha-icon { display:block; --mdc-icon-size:22px; --mdc-icon-size:5.5cqw; }
   .apl-emoji { font-size:20px; text-anchor:middle; dominant-baseline:central; }
   .barlbl { display:flex; justify-content:space-between; font-size:10.5px; opacity:.7; margin-top:4px; }
+  /* Écran large (iPad, PC en vue Panneau) : schéma à gauche, appareils et chiffres à droite */
+  ha-card.card { container-type:inline-size; container-name:efc; }
+  @container efc (min-width: 700px) {
+    .main { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:center; }
+    .flow svg { max-height:calc(100vh - 160px); }
+    .side .apl-head { margin-top:0; }
+    .side.noapl .stats { grid-template-columns:repeat(2, 1fr); gap:12px; margin-top:16px; }
+    .side.noapl .chip { padding:14px 16px; }
+    .side.noapl .chip .k { font-size:12px; }
+    .side.noapl .chip .v { font-size:22px; }
+  }
 </style>
 <ha-card class="card">
   <div class="top">
@@ -133,6 +144,8 @@ class EnergieFlowCard extends HTMLElement {
     <div class="ratio"><b id="auto">—</b><span>autonomie</span></div>
   </div>
 
+  <div class="main">
+  <div class="flow">
   <svg viewBox="0 0 400 470" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -252,6 +265,8 @@ class EnergieFlowCard extends HTMLElement {
     <text class="tag" x="272" y="466" id="t-carname">${c.car_name}</text>
     </g>
   </svg>
+  </div>
+  <div class="side${(c.appliances || []).length ? "" : " noapl"}">
 ${this._aplHtml()}
 
   <div class="bar"><i id="barfill"></i></div>
@@ -264,6 +279,8 @@ ${this._aplHtml()}
     <div class="chip"><div class="k">⚡ Achat</div><div class="v" id="d-imp">—</div></div>
     <div class="chip"><div class="k">💸 Vente</div><div class="v" id="d-exp">—</div></div>
     <div class="chip"><div class="k">🚗 ${c.car_name}</div><div class="v" id="d-car">—</div></div>
+  </div>
+  </div>
   </div>
 </ha-card>`;
     this._built = true;
