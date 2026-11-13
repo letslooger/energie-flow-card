@@ -57,6 +57,8 @@ As soon as the card is wider than 700 pixels, it rearranges itself: the diagram 
 
 ## Troubleshooting
 
+**Your car works as a battery (V2H / V2G) and the flow goes the wrong way.** The card expects a positive power while the car charges and a negative one while it powers the house. If your sensor does the opposite, add `invert_car: true` to the config. When the car feeds power back, the flow goes from the car to the inverter, in green.
+
 **Dots flow the wrong way (battery or grid).** Depending on the brand, a sensor may count charging as positive or negative. If the card shows "charge" while your battery is discharging, change `invert_battery: false` to `invert_battery: true` in the config. Same for the grid with `invert_grid` if buying and selling are swapped.
 
 **You replaced the file with a new version but nothing changes.** Your browser keeps the old version cached. In Settings > Dashboards > Resources, edit the URL: `?v=1` becomes `?v=2` (then `?v=3` next time), and reload the page.

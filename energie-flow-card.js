@@ -413,7 +413,8 @@ ${this._aplHtml()}
     const loadE = this._w(c.load_power);
     const loadN = this._w(c.load_non_essential_power);
     const load = loadE === null && loadN === null ? null : (loadE || 0) + (loadN || 0);
-    const car = this._w(c.car_power);
+    let car = this._w(c.car_power); // + = la voiture se charge, - = elle renvoie du courant (V2H / V2G)
+    if (car !== null && c.invert_car) car = -car;
     const soc = this._raw(c.battery_soc);
     const carSoc = this._raw(c.car_soc);
 
@@ -430,7 +431,7 @@ ${this._aplHtml()}
     this._flow("bat", bat, bat !== null && bat < 0 ? "#06d6a0" : "#ff8fab");
     this._flow("grid", grid, grid !== null && grid < 0 ? "#06d6a0" : "#7ab8ff");
     this._flow("home", load === null ? null : -load, "#c77dff");
-    this._flow("car", car === null ? null : -car, "#4cc9f0");
+    this._flow("car", car === null ? null : -car, car !== null && car < 0 ? "#06d6a0" : "#4cc9f0");
 
     // textes
     this._txt("t-pv", (night ? "🌙 " : "☀️ ") + this._fw(pv));
@@ -443,8 +444,9 @@ ${this._aplHtml()}
     this._txt("t-gridstate", grid === null || Math.abs(grid) < 15 ? "réseau" : grid > 0 ? "achat" : "vente");
     this._txt("t-home", this._fw(load));
     const carCharging = car !== null && car >= 15;
-    this._txt("t-car", carSoc !== null ? "🔋 " + Math.round(carSoc) + " %" : carCharging ? this._fw(car) : "—");
-    this._txt("t-carname", c.car_name + (carCharging ? " · " + this._fw(car) : ""));
+    const carGiving = car !== null && car <= -15; // voiture bidirectionnelle qui alimente la maison
+    this._txt("t-car", carSoc !== null ? "🔋 " + Math.round(carSoc) + " %" : carCharging || carGiving ? this._fw(car) : "—");
+    this._txt("t-carname", c.car_name + (carCharging ? " · " + this._fw(car) : carGiving ? " · ↩ " + this._fw(car) : ""));
 
     // batteries individuelles
     [[1, c.battery1_soc], [2, c.battery2_soc]].forEach(([n, id]) => {
@@ -541,7 +543,8 @@ ${this._aplHtml()}
 
     // humeur du moment
     let mood;
-    if (car !== null && car >= 15) mood = `🚗 La ${c.car_name} fait le plein d'électrons…`;
+    if (car !== null && car >= 15) mood = `🚗 ${c.car_name} fait le plein d'électrons…`;
+    else if (car !== null && car <= -15) mood = `🔄 ${c.car_name} sert de batterie et alimente la maison !`;
     else if (night && bat !== null && bat > 15) mood = "🌙 Bonne nuit, la batterie veille sur la maison.";
     else if (night) mood = "🌙 Le soleil dort, tout est calme.";
     else if ((pv || 0) > (load || 0) + 200 && bat !== null && bat < -15) mood = "☀️ Le soleil fait tout le boulot et remplit la batterie !";

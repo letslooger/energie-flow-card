@@ -34,6 +34,10 @@ invert_grid: false
 load_power: sensor.maison_consommation
 # facultatif : voiture électrique
 car_power: sensor.voiture_puissance_charge
+# facultatif : voiture bidirectionnelle (V2H / V2G). La carte attend
+# + quand la voiture se charge et - quand elle alimente la maison.
+# Ton capteur fait l'inverse ? mets true
+invert_car: false
 car_soc: sensor.voiture_batterie
 # bilan du jour (kWh)
 pv_today: sensor.production_du_jour

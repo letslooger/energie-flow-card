@@ -57,6 +57,8 @@ Dès que la carte fait plus de 700 pixels de large, elle se réorganise toute se
 
 ## En cas de souci
 
+**La voiture sert de batterie (V2H / V2G) et le flux va dans le mauvais sens.** La carte attend une puissance positive quand la voiture se charge et négative quand elle alimente la maison. Si ton capteur fait l'inverse, ajoute `invert_car: true` dans la configuration. Quand la voiture renvoie du courant, le flux part de la voiture vers l'onduleur, en vert.
+
 **Les points vont dans le mauvais sens (batterie ou réseau).** Selon les marques, un capteur peut compter la charge en positif ou en négatif. Si la carte affiche « charge » alors que ta batterie se décharge, remplace `invert_battery: false` par `invert_battery: true` dans la configuration. Même chose pour le réseau avec `invert_grid` si « achat » et « vente » sont inversés.
 
 **Tu as remplacé le fichier par une nouvelle version, mais rien ne change.** Le navigateur garde l'ancienne version en mémoire. Dans Paramètres > Tableaux de bord > Ressources, modifie l'adresse : `?v=1` devient `?v=2` (puis `?v=3` à la mise à jour suivante), et recharge la page.
